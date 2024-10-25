@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개선된 두더지 잡기 게임</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #8FBC8F;
+        }
+        .game-container {
+            text-align: center;
+        }
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 120px);
+            grid-gap: 15px;
+            margin-top: 20px;
+        }
+        .hole {
+            width: 120px;
+            height: 120px;
+            background-color: #654321;
+            border-radius: 50%;
+            overflow: hidden;
+            position: relative;
+        }
+        .mole {
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="45" fill="%23804000"/><circle cx="30" cy="35" r="5" fill="%23000"/><circle cx="70" cy="35" r="5" fill="%23000"/><ellipse cx="50" cy="55" rx="15" ry="10" fill="%23FFA07A"/><path d="M30 70 Q50 80 70 70" stroke="%23000" stroke-width="3" fill="none"/><path d="M20 20 Q30 10 40 20" stroke="%23000" stroke-width="2" fill="none"/><path d="M60 20 Q70 10 80 20" stroke="%23000" stroke-width="2" fill="none"/></svg>');
+            background-size: cover;
+            position: absolute;
+            bottom: 100%;
+            transition: bottom 0.3s;
+            cursor: pointer;
+        }
+        .mole.show {
+            bottom: 0;
+        }
+        .hammer {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect x="40" y="0" width="20" height="70" fill="%23d2691e"/><circle cx="50" cy="80" r="20" fill="%23ff69b4"/></svg>');
+            background-size: cover;
+            pointer-events: none;
+            display: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>개선된 두더지 잡기 게임</h1>
+        <p>점수: <span id="score">0</span></p>
+        <div class="game-board">
+            <div class="hole"><div class="mole"></div></div>
+            <div class="hole"><div class="mole"></div></div>
+            <div class="hole"><div class="mole"></div></div>
+            <div class="hole"><div class="mole"></div></div>
+            <div class="hole"><div class="mole"></div></div>
+            <div class="hole"><div class="mole"></div></div>
+            <div class="hole"><div class="mole"></div></div>
+            <div class="hole"><div class="mole"></div></div>
+            <div class="hole"><div class="mole"></div></div>
+        </div>
+    </div>
+    <div class="hammer"></div>
+
+    <script>
+        const moles = document.querySelectorAll('.mole');
+        const scoreDisplay = document.getElementById('score');
+        const hammer = document.querySelector('.hammer');
+        let score = 0;
+        let gameInterval;
+
+        function randomTime(min, max) {
+            return Math.round(Math.random() * (max - min) + min);
+        }
+
+        function randomMole(moles) {
+            const idx = Math.floor(Math.random() * moles.length);
+            return moles[idx];
+        }
+
+        function showMole() {
+            const time = randomTime(1000, 2000);  // 더 긴 시간 범위
+            const mole = randomMole(moles);
+            mole.classList.add('show');
+            setTimeout(() => {
+                mole.classList.remove('show');
+                if (!gameInterval) return;
+                showMole();
+            }, time);
+        }
+
+        function startGame() {
+            score = 0;
+            scoreDisplay.textContent = score;
+            showMole();
+            gameInterval = setTimeout(() => {
+                gameInterval = null;
+                alert('게임 종료! 최종 점수: ' + score);
+            }, 30000);  // 게임 시간을 30초로 연장
+        }
+
+        function whack(e) {
+            if (!e.isTrusted) return;
+            score++;
+            this.classList.remove('show');
+            scoreDisplay.textContent = score;
+
+            // 뿅망치 효과
+            hammer.style.display = 'block';
+            hammer.style.left = e.pageX - 30 + 'px';
+            hammer.style.top = e.pageY - 30 + 'px';
+            setTimeout(() => {
+                hammer.style.display = 'none';
+            }, 100);
+        }
+
+        moles.forEach(mole => mole.addEventListener('click', whack));
+
+        startGame();
+    </script>
+</body>
+</html>
